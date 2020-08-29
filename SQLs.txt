@@ -1,0 +1,132 @@
+-- Autorizar NFCe no banco
+update nfce
+	set nfc_fl_status = 'A'
+	where nfc_dt_recibo >= '20200101'
+		and nfc_fl_integraweb = 'N';
+
+-- Rodar toda vez que atualizar o PDV e integra
+UPDATE EMPRESA
+	SET versao_qualitypdv = NULL,
+		idscriptintegra = NULL,
+		idscriptpdv = NULL;
+
+-- Definir nota como cancelada no sistema
+update pedido
+	set situ = 'X',
+		integracaoweb = 'N',
+		ven_cd_venda = null
+	where pedido.codi = '';
+	
+update itemped 
+	set idabast = null
+	where itemped.pedido = '';
+
+--Cancela pedido e volta para tela
+update pedido 
+	set situ = 'X',
+		integracaoweb = 'N',
+		ven_cd_venda = null 
+	where pedido.codi = '25446';
+
+update itemped 
+	set idabast = null
+	where itemped.pedido = '25446';
+		
+update abastecimentos
+	set imprimiu = NULL,
+		tipo = NULL,
+		cupom  = NULL,
+		docu = null
+	where abastecimentos.docu = '25446';
+
+
+--Pesquisar o codi na tabela pedido
+select * from pedido 
+	where cupom = 163394 
+		or cupom = 163451
+
+-- Codigo com menos digitos
+ALTER TABLE public.pedido
+	DROP CONSTRAINT pedido_fk_cliente RESTRICT;
+ALTER TABLE public.pedido
+	ADD CONSTRAINT pedido_fk_cliente FOREIGN KEY (clie)
+		REFERENCES public.clientes(cli_cod_a)
+		MATCH FULL
+		ON DELETE NO ACTION
+		ON UPDATE CASCADE
+		NOT DEFERRABLE;
+-- object recreation
+ALTER TABLE public.clientes_prazo
+  	DROP CONSTRAINT clientes_prazo_fk_clientes RESTRICT;
+ALTER TABLE public.clientes_prazo
+	ADD CONSTRAINT clientes_prazo_fk_clientes FOREIGN KEY (cliente)
+		REFERENCES public.clientes(cli_cod_a)
+		MATCH FULL
+		ON DELETE NO ACTION
+		ON UPDATE CASCADE
+		NOT DEFERRABLE;
+-- object recreation
+ALTER TABLE public.financeiro
+	DROP CONSTRAINT financeiro_fk_clientes RESTRICT;
+ALTER TABLE public.financeiro
+	ADD CONSTRAINT financeiro_fk_clientes FOREIGN KEY (clie)
+		REFERENCES public.clientes(cli_cod_a)
+		MATCH FULL
+		ON DELETE NO ACTION
+		ON UPDATE CASCADE
+		NOT DEFERRABLE;
+-- object recreation
+ALTER TABLE public.cartes
+	DROP CONSTRAINT cartes_fk_clientes RESTRICT;
+ALTER TABLE public.cartes
+	ADD CONSTRAINT cartes_fk_clientes FOREIGN KEY (codcli)
+		REFERENCES public.clientes(cli_cod_a)
+		MATCH FULL
+		ON DELETE NO ACTION
+		ON UPDATE CASCADE
+		NOT DEFERRABLE;
+
+--Abrir PDV antigo
+UPDATE EMPRESA
+	SET 
+		versao_qualitypdv = NULL,
+		idscriptintegra = NULL,
+		idscriptpdv = NULL,
+		unn_ds_versao_ibpt = '19.1.0';
+
+--Selecionar mais de uma coluna
+select 
+	pro_ds_cfop_saida 
+from 
+	produtos
+	where 
+		codpro = '00001' or codpro = '00002' or codpro = '00003'
+
+--Procura coluna em todas as tabelas
+SELECT
+   TABLE_NAME AS TABELA,
+   COLUMN_NAME AS CAMPO  
+FROM
+   INFORMATION_SCHEMA.COLUMNS   
+WHERE
+   COLUMN_NAME LIKE 'cli_cd_cliente' -- Exemplo: 'id_empresa%'   
+   --AND COLUMN_NAME <> 'nome_campo_exclusao' -- Exemplo: 'id_empresaerp'   
+ORDER BY
+   TABELA ASC
+   
+--Erros de Pedido
+select * 
+from 
+	abastecimentos 
+where 
+	datafiscal >= '20200710' 
+and 
+	imprimiu is null
+
+select * from pedido where cupom = '251370'
+
+select * from itemped where pedido = '4356085'
+
+select * from formaspagrecebida where pedido = '226258'
+
+select * from cartes where cupom = '226258'
